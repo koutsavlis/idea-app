@@ -33,7 +33,7 @@ class DemoSeeder extends Seeder
         return [
             [
                 'title' => 'Launch a personal developer blog',
-                'description' => "Write about what I learn while building Laravel apps.\n\nStart with **one post per week**.",
+                'description' => "Write about what I learn while building Laravel apps.\n\nStart with one post per week.",
                 'status' => IdeaStatus::IN_PROGRESS,
                 'links' => ['https://laravel.com/docs'],
                 'steps' => [
