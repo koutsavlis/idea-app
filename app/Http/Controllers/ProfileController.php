@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Notifications\EmailChanged;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
@@ -36,7 +36,7 @@ class ProfileController extends Controller
             'password' => $request->password ?? $user->password,
         ]);
 
-        if($originalEmail !== $request->email){
+        if ($originalEmail !== $request->email) {
             Notification::route('mail', $originalEmail)
                 ->notify(new EmailChanged($user, $originalEmail));
         }

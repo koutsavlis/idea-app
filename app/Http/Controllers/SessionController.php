@@ -19,7 +19,7 @@ class SessionController extends Controller
             'password' => ['required', 'string', 'min:8', 'max:255'],
         ]);
 
-        if(! Auth::attempt($attributes)){
+        if (! Auth::attempt($attributes)) {
             return back()
                 ->withErrors(['password' => 'We are unable to authenticate using the provided credentials.'])
                 ->withInput();
@@ -28,7 +28,7 @@ class SessionController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended('/')->with('success', 'You are now logged in.');
-        
+
     }
 
     public function destroy(Request $request)

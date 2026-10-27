@@ -3,18 +3,19 @@
 namespace App\Models;
 
 use App\IdeaStatus;
+use Database\Factories\IdeaFactory;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Storage;
 
 class Idea extends Model
 {
-    /** @use HasFactory<\Database\Factories\IdeaFactory> */
+    /** @use HasFactory<IdeaFactory> */
     use HasFactory;
 
     protected $casts = [
@@ -35,8 +36,8 @@ class Idea extends Model
             ->pluck('count', 'status');
 
         return collect(IdeaStatus::cases())
-            ->mapWithKeys(fn($status) => [
-                $status->value => $counts->get($status->value, 0)
+            ->mapWithKeys(fn ($status) => [
+                $status->value => $counts->get($status->value, 0),
             ])
             ->put('all', $user->ideas()->count());
     }
@@ -54,7 +55,7 @@ class Idea extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::get(
-            fn() => $this->image_path ? Storage::url($this->image_path) : null
+            fn () => $this->image_path ? Storage::url($this->image_path) : null
         );
     }
 }

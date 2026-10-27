@@ -33,4 +33,3 @@ class RegisteredUserController extends Controller
         return redirect('/')->with('success', 'Registration Complete');
     }
 }
-

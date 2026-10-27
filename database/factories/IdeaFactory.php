@@ -26,5 +26,3 @@ class IdeaFactory extends Factory
         ];
     }
 }
-
-

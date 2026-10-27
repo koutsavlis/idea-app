@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('image_path')->nullable();
             $table->json('links')->default('[]');
             $table->timestamps();
-            
+
         });
     }
 

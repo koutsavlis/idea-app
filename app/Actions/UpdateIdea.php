@@ -3,8 +3,6 @@
 namespace App\Actions;
 
 use App\Models\Idea;
-use App\Models\User;
-use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Support\Facades\DB;
 
 class UpdateIdea

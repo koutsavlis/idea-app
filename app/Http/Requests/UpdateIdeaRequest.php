@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\IdeaStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\IdeaStatus;
 
 class UpdateIdeaRequest extends FormRequest
 {
