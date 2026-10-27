@@ -20,7 +20,7 @@ class CreateIdea
         ])->toArray();
 
         if ($attributes['image'] ?? false) {
-            $data['image_path'] = $attributes['image']->store('ideas', 'public');
+            $data['image_path'] = $attributes['image']->store('ideas');
         }
 
         DB::transaction(function () use ($data, $attributes) {
