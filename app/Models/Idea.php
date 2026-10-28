@@ -25,6 +25,7 @@ class Idea extends Model
 
     protected $attributes = [
         'status' => IdeaStatus::PENDING->value,
+        'links' => '[]',
     ];
 
     public static function statusCounts(User $user): Collection
