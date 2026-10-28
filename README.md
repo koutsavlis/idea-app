@@ -1,58 +1,107 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Idea
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel app for capturing ideas and turning them into actionable steps.
+Track each idea's status, attach links and a featured image, and tick off steps as you make progress.
 
-## About Laravel
+**Live demo:** https://idea-production-i95n1d.laravel.cloud
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Email | Password |
+|-------|----------|
+| `demo@example.com` | `password` |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+> The app scales to zero when idle, so the first request may take a few seconds to wake it up.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+![Ideas overview with status filters](docs/ideas.png)
 
-## Learning Laravel
+<details>
+<summary>More screenshots</summary>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+![A single idea with its featured image, steps and links](docs/idea-details.png)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+</details>
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## Features
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- **Authentication**: registration, login, logout and profile editing (name, email, password)
+- **Ideas**: create, edit and delete ideas from a modal form
+- **Status tracking**: Pending, In Progress or Completed, with filter pills that show a count per status
+- **Actionable steps**: break an idea into steps and toggle each one as completed
+- **Links**: attach one or more reference links to an idea
+- **Featured images**: upload, replace or remove an image per idea
+- **Authorization**: users only ever see and change their own ideas and steps
+- **Notifications**: the previous email address is notified when a user changes it
+
+## Tech stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | PHP 8.4, Laravel 13 |
+| Frontend | Blade components, Tailwind CSS v4, Alpine.js, Vite |
+| Database | SQLite (local), MySQL (production) |
+| Storage | Local `public` disk (local), Laravel Object Storage / Cloudflare R2 (production) |
+| Testing | Pest 4, including browser tests with Playwright |
+| Hosting | Laravel Cloud, with push-to-deploy from `main` |
+
+## Architecture notes
+
+- **Action classes** (`app/Actions/CreateIdea`, `UpdateIdea`) hold the create and update logic, so controllers stay thin. An idea and its steps are written inside a single database transaction.
+- **Form Requests** (`StoreIdeaRequest`, `UpdateIdeaRequest`) validate input before it reaches the controller.
+- **Policies**: `IdeaPolicy::workWith` is the single ownership rule. Steps reuse it through their parent idea instead of duplicating it.
+- **Enum** `IdeaStatus` is a backed enum cast on the model, with labels and the list of valid values for filtering.
+- **Environment-driven storage**: the code stores images on the *default* disk and resolves URLs through an `image_url` accessor. The same code writes to the local disk in development and to an object storage bucket in production. Only `FILESYSTEM_DISK` changes.
+- **Database-agnostic models**: explicit casts (booleans, JSON, enum) and model-level defaults, so behaviour is identical on SQLite and MySQL.
+- **Idempotent demo seeder**: `DemoSeeder` can run on every deploy without duplicating data, and resets the demo account.
+
+## Getting started
+
+Requirements: PHP 8.3+, Composer, Node.js 22+.
 
 ```bash
-composer require laravel/boost --dev
+git clone https://github.com/koutsavlis/idea-app.git
+cd idea-app
 
-php artisan boost:install
+composer run setup          # install dependencies, create .env, generate key, migrate, build assets
+php artisan storage:link    # make uploaded images publicly accessible
+php artisan db:seed         # create the demo user and sample ideas
+
+composer run dev            # start the server, queue worker and Vite
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Then open http://localhost:8000 and log in with the demo credentials above.
 
-## Contributing
+## Running tests
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+npx playwright install      # once, for the browser tests
+php artisan test
+```
 
-## Code of Conduct
+## Deployment
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The app runs on [Laravel Cloud](https://cloud.laravel.com). Every push to `main` triggers a deployment.
 
-## Security Vulnerabilities
+- **Build:** `composer install --no-dev --optimize-autoloader`, `npm ci`, `npm run build`
+- **Deploy:** `php artisan migrate --force --seed`
+- **Resources:** a MySQL database and a public object storage bucket attached as the default disk. Cloud injects their connection details as environment variables.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Credits and what I added
 
-## License
+The app was built following [Laravel From Scratch (2026 Edition)](https://laracasts.com/series/laravel-from-scratch-2026) by Jeffrey Way on Laracasts.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+On top of the course project I:
+
+- Deployed it to **Laravel Cloud** instead of Forge, which meant moving image storage from the local disk to an **object storage bucket** behind an environment-driven disk
+- Fixed **SQLite-only behaviour** that broke on MySQL: a JSON column default and a missing boolean cast
+- Closed an **authorization gap** on step updates and covered it with feature tests
+- Added an **idempotent demo seeder** for the live demo
+- Ran `composer audit` and patched **26 security advisories** in production dependencies
+- Fixed invalid CSS that only failed in the production build, and cleaned up dead code
+
+## Roadmap
+
+- Delete orphaned image files when an image is replaced or an idea is deleted
+- Resize and optimise uploaded images in a queued job
+- Apply the Rector configuration after reviewing its changes
+- Team support, so ideas can be shared between users
